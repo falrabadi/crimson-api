@@ -1,0 +1,25 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.userprefs
+*.DS_Store
+
+## Environment
+.env
+.env.local
+.env.*.local
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
+!appsettings.Staging.json
+!appsettings.Production.json
+
+## Docker
+.docker/
+
+## Logs
+logs/
+*.log
