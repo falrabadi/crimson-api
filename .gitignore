@@ -12,11 +12,12 @@ obj/
 .env.local
 .env.*.local
 infra/.env
+# Ignore all environment-specific appsettings (they may hold real secrets).
+# Only the base file, local Development config, and *.example templates are tracked.
 appsettings.*.json
 !appsettings.json
 !appsettings.Development.json
-!appsettings.Staging.json
-!appsettings.Production.json
+!appsettings.*.example.json
 
 ## Docker
 .docker/

@@ -9,6 +9,7 @@ Cosmos is a portfolio project demonstrating full-stack architecture, containeriz
 | `cosmos-api` | `/mnt/c/Code/cosmos-api` | C# backend monorepo — all services and shared packages |
 | `cosmos-ui` | `/mnt/c/Code/cosmos-ui` | React/TypeScript frontend monorepo — all apps and shared packages |
 | `cosmos-schema` | `/mnt/c/Code/cosmos-schema` | OpenAPI contracts — auto-synced from backend services |
+| `cosmos-infra` | `/mnt/c/Code/cosmos-infra` | IaC — Terraform (Hetzner VPS), k3s, Kustomize manifests, deploy pipelines |
 
 ## Architecture
 
@@ -38,8 +39,8 @@ Each backend service auto-publishes its OpenAPI spec to `cosmos-schema` on CI me
   /.github
     /workflows
       ci.yml              ← runs on every push/PR (restore, build, test)
-      cd-staging.yml      ← deploys on merge to staging branch
-      cd-prod.yml         ← deploys on merge to main branch
+      cd-staging.yml      ← manual dispatch; deploys master to staging
+      cd-prod.yml         ← manual dispatch; deploys master to production
   cosmos-api.sln
 ```
 
@@ -58,8 +59,8 @@ Each service lives under `/services/Cosmos.[Name]/` and follows this structure:
     Program.cs
     appsettings.json
     appsettings.Development.json
-    appsettings.Staging.json
-    appsettings.Production.json
+    appsettings.Staging.example.json      ← template only; real values via k8s secrets
+    appsettings.Production.example.json   ← template only; real values via k8s secrets
     Cosmos.[Name].csproj
   /tests
     Cosmos.[Name].Tests.csproj
@@ -83,7 +84,9 @@ Shared internal libraries live under `/packages/Cosmos.[Name]/`:
 
 ```bash
 # Start infrastructure only (postgres + redis)
-docker compose -f infra/docker-compose.yml up -d
+# NOTE: --env-file is required because the .env lives in infra/, not the repo root.
+# Docker Compose only auto-loads .env from the current directory.
+docker compose --env-file infra/.env -f infra/docker-compose.yml up -d
 
 # Run a specific service + its infrastructure
 scripts\run-service.bat
@@ -103,11 +106,15 @@ scripts\create-package.bat
 
 ### Environments
 
-| Environment | Branch | Trigger |
+Single long-lived branch (`master`) plus feature branches. Deploys are **manual**
+(`workflow_dispatch`) — there is no per-environment branch. CI must pass first, then
+you click "Run workflow" to promote.
+
+| Environment | Source | Trigger |
 |---|---|---|
-| Development | any | local `docker-compose` |
-| Staging | `staging` | merge triggers `cd-staging.yml` |
-| Production | `main` | merge triggers `cd-prod.yml` |
+| Development | local | `docker compose` via `scripts/run-service.bat` |
+| Staging | `master` | manual dispatch of `cd-staging.yml` |
+| Production | `master` | manual dispatch of `cd-prod.yml` |
 
 ## cosmos-ui
 
@@ -134,5 +141,6 @@ Stores OpenAPI YAML specs auto-published by backend services on CI merge. Fronte
 - All C# projects are prefixed with `Cosmos.` (e.g. `Cosmos.Auth`, `Cosmos.Shared.Contracts`)
 - All frontend packages are scoped to `@cosmos/` (e.g. `@cosmos/auth`)
 - Each service has its own `Dockerfile` for independent containerization
-- Secrets are never committed — use environment variables and `appsettings.*.json` (excluded from git)
-- `appsettings.Staging.json` and `appsettings.Production.json` are injected at deploy time via CI secrets
+- Secrets are never committed. `appsettings.Staging.json` / `appsettings.Production.json` are gitignored; only `*.example.json` templates are tracked
+- Real Staging/Production config is supplied at deploy time via k8s secrets / env vars (see `cosmos-infra`)
+- Each service's Docker build uses the **repo root** as its build context (via a root `.dockerignore`) so shared `/packages` references resolve

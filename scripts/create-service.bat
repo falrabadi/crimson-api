@@ -65,8 +65,21 @@ mkdir %SERVICE_DIR%\src\Config      2>nul
 
 echo [6/7] Creating environment config and Dockerfile...
 
-echo {} > %SERVICE_DIR%\src\appsettings.Staging.json
-echo {} > %SERVICE_DIR%\src\appsettings.Production.json
+rem Committed templates only. Real Staging/Production appsettings are gitignored
+rem and are provided at deploy time via k8s secrets / env vars.
+echo {                          > %SERVICE_DIR%\src\appsettings.Staging.example.json
+echo   "ConnectionStrings": {  >> %SERVICE_DIR%\src\appsettings.Staging.example.json
+echo     "Postgres": "",        >> %SERVICE_DIR%\src\appsettings.Staging.example.json
+echo     "Redis": ""            >> %SERVICE_DIR%\src\appsettings.Staging.example.json
+echo   }                        >> %SERVICE_DIR%\src\appsettings.Staging.example.json
+echo }                          >> %SERVICE_DIR%\src\appsettings.Staging.example.json
+
+echo {                          > %SERVICE_DIR%\src\appsettings.Production.example.json
+echo   "ConnectionStrings": {  >> %SERVICE_DIR%\src\appsettings.Production.example.json
+echo     "Postgres": "",        >> %SERVICE_DIR%\src\appsettings.Production.example.json
+echo     "Redis": ""            >> %SERVICE_DIR%\src\appsettings.Production.example.json
+echo   }                        >> %SERVICE_DIR%\src\appsettings.Production.example.json
+echo }                          >> %SERVICE_DIR%\src\appsettings.Production.example.json
 
 del /q %SERVICE_DIR%\src\WeatherForecast.cs 2>nul
 del /q %SERVICE_DIR%\src\Controllers\WeatherForecastController.cs 2>nul
@@ -77,26 +90,22 @@ echo EXPOSE 8080 >> %SERVICE_DIR%\Dockerfile
 echo. >> %SERVICE_DIR%\Dockerfile
 echo FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build >> %SERVICE_DIR%\Dockerfile
 echo WORKDIR /src >> %SERVICE_DIR%\Dockerfile
-echo COPY src/%FULL_NAME%.csproj src/ >> %SERVICE_DIR%\Dockerfile
-echo RUN dotnet restore src/%FULL_NAME%.csproj >> %SERVICE_DIR%\Dockerfile
+echo # Build context is the REPO ROOT so shared /packages references resolve. >> %SERVICE_DIR%\Dockerfile
 echo COPY . . >> %SERVICE_DIR%\Dockerfile
-echo WORKDIR /src/src >> %SERVICE_DIR%\Dockerfile
-echo RUN dotnet build %FULL_NAME%.csproj -c Release -o /app/build >> %SERVICE_DIR%\Dockerfile
-echo. >> %SERVICE_DIR%\Dockerfile
-echo FROM build AS publish >> %SERVICE_DIR%\Dockerfile
-echo RUN dotnet publish %FULL_NAME%.csproj -c Release -o /app/publish /p:UseAppHost=false >> %SERVICE_DIR%\Dockerfile
+echo RUN dotnet restore services/%FULL_NAME%/src/%FULL_NAME%.csproj >> %SERVICE_DIR%\Dockerfile
+echo RUN dotnet publish services/%FULL_NAME%/src/%FULL_NAME%.csproj -c Release -o /app/publish /p:UseAppHost=false >> %SERVICE_DIR%\Dockerfile
 echo. >> %SERVICE_DIR%\Dockerfile
 echo FROM base AS final >> %SERVICE_DIR%\Dockerfile
 echo WORKDIR /app >> %SERVICE_DIR%\Dockerfile
-echo COPY --from=publish /app/publish . >> %SERVICE_DIR%\Dockerfile
+echo COPY --from=build /app/publish . >> %SERVICE_DIR%\Dockerfile
 echo ENTRYPOINT ["dotnet", "%FULL_NAME%.dll"] >> %SERVICE_DIR%\Dockerfile
 
 echo [7/7] Creating docker-compose.yml for service...
 echo services:                                                    > %SERVICE_DIR%\docker-compose.yml
 echo   %COMPOSE_NAME%:                                           >> %SERVICE_DIR%\docker-compose.yml
 echo     build:                                                  >> %SERVICE_DIR%\docker-compose.yml
-echo       context: .                                            >> %SERVICE_DIR%\docker-compose.yml
-echo       dockerfile: Dockerfile                                >> %SERVICE_DIR%\docker-compose.yml
+echo       context: ../..                                        >> %SERVICE_DIR%\docker-compose.yml
+echo       dockerfile: services/%FULL_NAME%/Dockerfile           >> %SERVICE_DIR%\docker-compose.yml
 echo     ports:                                                  >> %SERVICE_DIR%\docker-compose.yml
 echo       - '%PORT%:8080'                                       >> %SERVICE_DIR%\docker-compose.yml
 echo     environment:                                            >> %SERVICE_DIR%\docker-compose.yml
@@ -124,8 +133,8 @@ echo  │   ├── Config\
 echo  │   ├── Program.cs
 echo  │   ├── appsettings.json
 echo  │   ├── appsettings.Development.json
-echo  │   ├── appsettings.Staging.json
-echo  │   └── appsettings.Production.json
+echo  │   ├── appsettings.Staging.example.json
+echo  │   └── appsettings.Production.example.json
 echo  ├── tests\
 echo  ├── Dockerfile
 echo  └── docker-compose.yml

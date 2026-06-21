@@ -1,0 +1,14 @@
+# Service Docker builds use the REPO ROOT as their build context (so shared
+# /packages are visible). This file keeps that context lean and fast.
+
+**/bin/
+**/obj/
+**/.vs/
+.git/
+.github/
+**/*.user
+**/node_modules/
+
+# Never ship local env files or secrets into an image.
+infra/.env
+**/appsettings.Development.json
