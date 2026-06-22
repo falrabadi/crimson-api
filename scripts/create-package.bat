@@ -2,7 +2,7 @@
 setlocal
 
 echo ================================
-echo  Cosmos API - Create Package
+echo  Crimson API - Create Package
 echo ================================
 echo.
 
@@ -13,7 +13,7 @@ if "%PACKAGE_NAME%"=="" (
     exit /b 1
 )
 
-set FULL_NAME=Cosmos.%PACKAGE_NAME%
+set FULL_NAME=Crimson.%PACKAGE_NAME%
 set PACKAGE_DIR=packages\%FULL_NAME%
 
 echo.
@@ -41,8 +41,8 @@ dotnet add %PACKAGE_DIR%\tests\%FULL_NAME%.Tests.csproj reference %PACKAGE_DIR%\
 if errorlevel 1 ( echo Error adding project reference. & exit /b 1 )
 
 echo [4/4] Adding projects to solution...
-dotnet sln cosmos-api.sln add %PACKAGE_DIR%\src\%FULL_NAME%.csproj
-dotnet sln cosmos-api.sln add %PACKAGE_DIR%\tests\%FULL_NAME%.Tests.csproj
+dotnet sln crimson-api.sln add %PACKAGE_DIR%\src\%FULL_NAME%.csproj
+dotnet sln crimson-api.sln add %PACKAGE_DIR%\tests\%FULL_NAME%.Tests.csproj
 
 del /q %PACKAGE_DIR%\src\Class1.cs 2>nul
 

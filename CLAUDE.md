@@ -1,33 +1,33 @@
-# Cosmos - Project Overview
+# Crimson - Project Overview
 
-Cosmos is a portfolio project demonstrating full-stack architecture, containerization, CI/CD pipelines, and the full SDLC. It consists of three repositories, all located under `C:/Code/` (`/mnt/c/Code/` in WSL).
+Crimson is a portfolio project demonstrating full-stack architecture, containerization, CI/CD pipelines, and the full SDLC. It consists of three repositories, all located under `C:/Code/` (`/mnt/c/Code/` in WSL).
 
 ## Repositories
 
 | Repo | Path | Purpose |
 |---|---|---|
-| `cosmos-api` | `/mnt/c/Code/cosmos-api` | C# backend monorepo — all services and shared packages |
-| `cosmos-ui` | `/mnt/c/Code/cosmos-ui` | React/TypeScript frontend monorepo — all apps and shared packages |
-| `cosmos-schema` | `/mnt/c/Code/cosmos-schema` | OpenAPI contracts — auto-synced from backend services |
-| `cosmos-infra` | `/mnt/c/Code/cosmos-infra` | IaC — Terraform (Hetzner VPS), k3s, Kustomize manifests, deploy pipelines |
+| `crimson-api` | `/mnt/c/Code/crimson-api` | C# backend monorepo — all services and shared packages |
+| `crimson-ui` | `/mnt/c/Code/crimson-ui` | React/TypeScript frontend monorepo — all apps and shared packages |
+| `crimson-schema` | `/mnt/c/Code/crimson-schema` | OpenAPI contracts — auto-synced from backend services |
+| `crimson-infra` | `/mnt/c/Code/crimson-infra` | IaC — Terraform (Hetzner VPS), k3s, Kustomize manifests, deploy pipelines |
 
 ## Architecture
 
 ```
-cosmos-api (C# / ASP.NET Core)
-    ↕ OpenAPI contract (cosmos-schema)
-cosmos-ui (React / TypeScript)
+crimson-api (C# / ASP.NET Core)
+    ↕ OpenAPI contract (crimson-schema)
+crimson-ui (React / TypeScript)
 ```
 
-Each backend service auto-publishes its OpenAPI spec to `cosmos-schema` on CI merge. The frontend consumes those specs to generate typed API clients.
+Each backend service auto-publishes its OpenAPI spec to `crimson-schema` on CI merge. The frontend consumes those specs to generate typed API clients.
 
-## cosmos-api
+## crimson-api
 
 **Stack:** C# / ASP.NET Core 8, PostgreSQL, Redis
-**Solution file:** `cosmos-api.sln` — ties all projects together, one `dotnet build` builds everything
+**Solution file:** `crimson-api.sln` — ties all projects together, one `dotnet build` builds everything
 
 ```
-/cosmos-api
+/crimson-api
   /services         ← independently deployable ASP.NET Core services
   /packages         ← shared C# class libraries (NuGet-style, internal)
   /infra
@@ -41,15 +41,15 @@ Each backend service auto-publishes its OpenAPI spec to `cosmos-schema` on CI me
       ci.yml              ← runs on every push/PR (restore, build, test)
       cd-staging.yml      ← manual dispatch; deploys master to staging
       cd-prod.yml         ← manual dispatch; deploys master to production
-  cosmos-api.sln
+  crimson-api.sln
 ```
 
 ### Services
 
-Each service lives under `/services/Cosmos.[Name]/` and follows this structure:
+Each service lives under `/services/Crimson.[Name]/` and follows this structure:
 
 ```
-/services/Cosmos.[Name]/
+/services/Crimson.[Name]/
   /src
     /Controllers
     /Services
@@ -61,23 +61,23 @@ Each service lives under `/services/Cosmos.[Name]/` and follows this structure:
     appsettings.Development.json
     appsettings.Staging.example.json      ← template only; real values via k8s secrets
     appsettings.Production.example.json   ← template only; real values via k8s secrets
-    Cosmos.[Name].csproj
+    Crimson.[Name].csproj
   /tests
-    Cosmos.[Name].Tests.csproj
+    Crimson.[Name].Tests.csproj
   Dockerfile
   docker-compose.yml    ← service-specific compose, merged with infra/docker-compose.yml at runtime
 ```
 
 ### Packages
 
-Shared internal libraries live under `/packages/Cosmos.[Name]/`:
+Shared internal libraries live under `/packages/Crimson.[Name]/`:
 
 ```
-/packages/Cosmos.[Name]/
+/packages/Crimson.[Name]/
   /src
-    Cosmos.[Name].csproj
+    Crimson.[Name].csproj
   /tests
-    Cosmos.[Name].Tests.csproj
+    Crimson.[Name].Tests.csproj
 ```
 
 ### Local Development
@@ -116,31 +116,31 @@ you click "Run workflow" to promote.
 | Staging | `master` | manual dispatch of `cd-staging.yml` |
 | Production | `master` | manual dispatch of `cd-prod.yml` |
 
-## cosmos-ui
+## crimson-ui
 
 **Stack:** React, TypeScript, pnpm workspaces
 
 ```
-/cosmos-ui
+/crimson-ui
   /apps             ← deployable React applications
-  /packages         ← shared internal npm packages (e.g. @cosmos/auth)
+  /packages         ← shared internal npm packages (e.g. @crimson/auth)
 ```
 
-## cosmos-schema
+## crimson-schema
 
 Stores OpenAPI YAML specs auto-published by backend services on CI merge. Frontend uses these to generate typed API clients.
 
 ```
-/cosmos-schema
+/crimson-schema
   /openapi
     [service-name].yaml
 ```
 
 ## Key Conventions
 
-- All C# projects are prefixed with `Cosmos.` (e.g. `Cosmos.Auth`, `Cosmos.Shared.Contracts`)
-- All frontend packages are scoped to `@cosmos/` (e.g. `@cosmos/auth`)
+- All C# projects are prefixed with `Crimson.` (e.g. `Crimson.Auth`, `Crimson.Shared.Contracts`)
+- All frontend packages are scoped to `@crimson/` (e.g. `@crimson/auth`)
 - Each service has its own `Dockerfile` for independent containerization
 - Secrets are never committed. `appsettings.Staging.json` / `appsettings.Production.json` are gitignored; only `*.example.json` templates are tracked
-- Real Staging/Production config is supplied at deploy time via k8s secrets / env vars (see `cosmos-infra`)
+- Real Staging/Production config is supplied at deploy time via k8s secrets / env vars (see `crimson-infra`)
 - Each service's Docker build uses the **repo root** as its build context (via a root `.dockerignore`) so shared `/packages` references resolve

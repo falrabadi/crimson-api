@@ -2,7 +2,7 @@
 setlocal
 
 echo ================================
-echo  Cosmos API - Create Service
+echo  Crimson API - Create Service
 echo ================================
 echo.
 
@@ -20,11 +20,11 @@ if "%PORT%"=="" (
     exit /b 1
 )
 
-set FULL_NAME=Cosmos.%SERVICE_NAME%
+set FULL_NAME=Crimson.%SERVICE_NAME%
 set SERVICE_DIR=services\%FULL_NAME%
 
 for /f %%i in ('powershell -NoProfile -Command "'%SERVICE_NAME%'.ToLower()"') do set SERVICE_LOWER=%%i
-set COMPOSE_NAME=cosmos-%SERVICE_LOWER%
+set COMPOSE_NAME=crimson-%SERVICE_LOWER%
 
 echo.
 echo Service Name   : %FULL_NAME%
@@ -53,8 +53,8 @@ dotnet add %SERVICE_DIR%\tests\%FULL_NAME%.Tests.csproj reference %SERVICE_DIR%\
 if errorlevel 1 ( echo Error adding project reference. & exit /b 1 )
 
 echo [4/7] Adding projects to solution...
-dotnet sln cosmos-api.sln add %SERVICE_DIR%\src\%FULL_NAME%.csproj
-dotnet sln cosmos-api.sln add %SERVICE_DIR%\tests\%FULL_NAME%.Tests.csproj
+dotnet sln crimson-api.sln add %SERVICE_DIR%\src\%FULL_NAME%.csproj
+dotnet sln crimson-api.sln add %SERVICE_DIR%\tests\%FULL_NAME%.Tests.csproj
 
 echo [5/7] Creating folder structure...
 mkdir %SERVICE_DIR%\src\Controllers 2>nul

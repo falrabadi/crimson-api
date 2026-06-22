@@ -2,7 +2,7 @@
 setlocal
 
 echo ================================
-echo  Cosmos API - Run Service
+echo  Crimson API - Run Service
 echo ================================
 echo.
 
@@ -13,7 +13,7 @@ if "%SERVICE_NAME%"=="" (
     exit /b 1
 )
 
-set FULL_NAME=Cosmos.%SERVICE_NAME%
+set FULL_NAME=Crimson.%SERVICE_NAME%
 set SERVICE_DIR=services\%FULL_NAME%
 set COMPOSE_FILE=%SERVICE_DIR%\docker-compose.yml
 set INFRA_FILE=infra\docker-compose.yml
