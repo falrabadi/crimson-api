@@ -1,6 +1,40 @@
-@Crimson.Auth_HostAddress = http://localhost:5017
+@host = http://localhost:5001
 
-GET {{Crimson.Auth_HostAddress}}/weatherforecast/
-Accept: application/json
+### Health check  -> 200 "Healthy"
+GET {{host}}/health
 
-###
+### Register a new account  -> 201 Created
+POST {{host}}/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "hunter2pw"
+}
+
+### Login with the correct password  -> 200 OK (user info)
+POST {{host}}/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "hunter2pw"
+}
+
+### Login with a wrong password  -> 401 Unauthorized
+POST {{host}}/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "wrong-password"
+}
+
+### Register the same email again  -> 400 Bad Request (already exists)
+POST {{host}}/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "another"
+}
