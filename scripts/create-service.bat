@@ -84,11 +84,11 @@ echo }                          >> %SERVICE_DIR%\src\appsettings.Production.exam
 del /q %SERVICE_DIR%\src\WeatherForecast.cs 2>nul
 del /q %SERVICE_DIR%\src\Controllers\WeatherForecastController.cs 2>nul
 
-echo FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base > %SERVICE_DIR%\Dockerfile
+echo FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base > %SERVICE_DIR%\Dockerfile
 echo WORKDIR /app >> %SERVICE_DIR%\Dockerfile
 echo EXPOSE 8080 >> %SERVICE_DIR%\Dockerfile
 echo. >> %SERVICE_DIR%\Dockerfile
-echo FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build >> %SERVICE_DIR%\Dockerfile
+echo FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build >> %SERVICE_DIR%\Dockerfile
 echo WORKDIR /src >> %SERVICE_DIR%\Dockerfile
 echo # Build context is the REPO ROOT so shared /packages references resolve. >> %SERVICE_DIR%\Dockerfile
 echo COPY . . >> %SERVICE_DIR%\Dockerfile

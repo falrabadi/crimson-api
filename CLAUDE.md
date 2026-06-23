@@ -1,6 +1,6 @@
 # Crimson - Project Overview
 
-Crimson is a portfolio project demonstrating full-stack architecture, containerization, CI/CD pipelines, and the full SDLC. It consists of three repositories, all located under `C:/Code/` (`/mnt/c/Code/` in WSL).
+Crimson is a portfolio project demonstrating full-stack architecture, containerization, CI/CD pipelines, and the full SDLC. It consists of four repositories, all located under `C:/Code/` (`/mnt/c/Code/` in WSL).
 
 ## Repositories
 
@@ -9,7 +9,7 @@ Crimson is a portfolio project demonstrating full-stack architecture, containeri
 | `crimson-api` | `/mnt/c/Code/crimson-api` | C# backend monorepo — all services and shared packages |
 | `crimson-ui` | `/mnt/c/Code/crimson-ui` | React/TypeScript frontend monorepo — all apps and shared packages |
 | `crimson-schema` | `/mnt/c/Code/crimson-schema` | OpenAPI contracts — auto-synced from backend services |
-| `crimson-infra` | `/mnt/c/Code/crimson-infra` | IaC — Terraform (Hetzner VPS), k3s, Kustomize manifests, deploy pipelines |
+| `crimson-infra` | `/mnt/c/Code/crimson-infra` | IaC — Terraform provisions Azure AKS (platform tier); services deploy onto it via the Terraform app-tier in crimson-api/iac |
 
 ## Architecture
 
@@ -23,7 +23,7 @@ Each backend service auto-publishes its OpenAPI spec to `crimson-schema` on CI m
 
 ## crimson-api
 
-**Stack:** C# / ASP.NET Core 8, PostgreSQL, Redis
+**Stack:** C# / ASP.NET Core 10, PostgreSQL, Redis
 **Solution file:** `crimson-api.sln` — ties all projects together, one `dotnet build` builds everything
 
 ```
