@@ -1,0 +1,9 @@
+services:
+  crimson.auth:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__Postgres=Host=postgres;Database=crimson_auth;Username=postgres;Password=postgres
+      - ConnectionStrings__Redis=redis:6379
+    ports:
+      - "5001:8080"
